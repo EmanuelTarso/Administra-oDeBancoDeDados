@@ -1,0 +1,200 @@
+-- Criando a base de dados
+CREATE DATABASE Aula3_livraria;
+USE Aula3_livraria;
+-- Criando as tabelas
+CREATE TABLE autores
+( autor_id INT PRIMARY KEY AUTO_INCREMENT,
+nome VARCHAR(100) NOT NULL,
+nacionalidade VARCHAR(50),
+data_nascimento DATE
+);
+CREATE TABLE livros (
+livro_id INT PRIMARY KEY AUTO_INCREMENT,
+titulo VARCHAR(200) NOT NULL,
+autor_id INT,
+genero VARCHAR(50),
+preco DECIMAL(10, 2),
+data_publicacao DATE,
+estoque INT DEFAULT 0,
+FOREIGN KEY (autor_id) REFERENCES autores(autor_id)
+);
+CREATE TABLE vendas (
+venda_id INT PRIMARY KEY AUTO_INCREMENT,
+livro_id INT,
+quantidade INT,
+data_venda DATETIME,
+valor_total DECIMAL(10, 2),
+FOREIGN KEY (livro_id) REFERENCES livros(livro_id)
+);
+INSERT INTO autores (nome, nacionalidade, data_nascimento) VALUES
+('Machado de Assis', 'Brasileiro', '1839-06-21'),
+('J.K. Rowling', 'Britânica', '1965-07-31'),
+('Gabriel García Márquez', 'Colombiano', '1927-03-06'),
+('Jane Austen', 'Britânica', '1775-12-16'),	
+('George Orwell', 'Britânico', '1903-06-25');
+-- Inserindo dados na tabela livros
+INSERT INTO livros (titulo, autor_id, genero, preco, data_publicacao, estoque)
+VALUES
+('Dom Casmurro', 1, 'Romance', 45.90, '1899-01-01', 120),
+('Memórias Póstumas de Brás Cubas', 1, 'Romance', 39.90, '1881-01-01', 85),
+('Harry Potter e a Pedra Filosofal', 2, 'Fantasia', 59.90, '1997-06-26', 200),
+('Harry Potter e a Câmara Secreta', 2, 'Fantasia', 49.90, '1998-07-02', 180),
+('Cem Anos de Solidão', 3, 'Realismo Mágico', 65.50, '1967-05-30', 70),
+('Orgulho e Preconceito', 4, 'Romance', 42.90, '1813-01-28', 95),
+('1984', 5, 'Distopia', 38.50, '1949-06-08', 150);
+-- Inserindo dados na tabela vendas
+INSERT INTO vendas (livro_id, quantidade, data_venda, valor_total) VALUES
+(1, 3, '2023-01-15 10:30:00', 137.70),
+(3, 2, '2023-01-16 14:20:00', 119.80),
+(5, 1, '2023-01-20 09:45:00', 65.50),
+(2, 4, '2023-02-05 16:15:00', 159.60),
+(7, 2, '2023-02-10 11:30:00', 77.00),
+(3, 5, '2023-02-15 13:45:00', 299.50),
+(4, 3, '2023-03-01 10:00:00', 149.70),
+(6, 2, '2023-03-05 15:30:00', 85.80),
+(1, 1, '2023-03-10 12:15:00', 45.90),
+(3, 3, '2023-03-15 17:40:00', 179.70);
+
+/*FUNCOES DE AGREGACAO*/
+-- Exemplo 1: Contar o número total de livros
+SELECT COUNT(*) AS total_livros FROM livros;
+-- Exemplo 2: Somar o estoque total de livros
+SELECT SUM(estoque) AS estoque_total FROM livros;
+-- Exemplo 3: Encontrar o livro mais caro
+SELECT MAX(preco) AS livro_mais_caro FROM livros;
+-- Exemplo 4: Encontrar o livro mais barato
+SELECT MIN(preco) AS livro_mais_barato FROM livros;
+-- Exemplo 5: Calcular o preço médio dos livros
+SELECT AVG(preco) AS preco_medio FROM livros;
+-- Exemplo 6: Agrupar vendas por livro e somar o total vendido
+SELECT livro_id, SUM(quantidade) AS qtd_vendida,SUM(valor_total) AS valor_total FROM vendas GROUP BY livro_id;
+
+/*Funções de String -- Manipulam texto e caracteres.*/
+
+-- Exemplo 1: Converter título para maiúsculas
+SELECT titulo, UPPER(titulo) AS titulo_maiusculo FROM
+livros;
+-- Exemplo 2: Converter título para minúsculas
+SELECT titulo, LOWER(titulo) AS titulo_minusculo FROM
+livros;
+-- Exemplo 3: Extrair parte do título (substring)
+SELECT titulo, SUBSTRING(titulo, 1, 10) AS
+titulo_resumido FROM livros;
+-- Exemplo 4: Concatenar nome do autor com nacionalidade
+SELECT nome, nacionalidade, CONCAT(nome, ' (',
+nacionalidade, ')') AS autor_info
+FROM autores;
+-- Exemplo 5: Remover espaços em branco
+SELECT TRIM(' Machado de Assis ') AS
+nome_sem_espacos;
+-- Exemplo 6: Substituir texto
+SELECT titulo, REPLACE(titulo, 'Harry Potter', 'HP') AS
+titulo_abreviado
+FROM livros WHERE titulo LIKE '%Harry Potter%';
+
+
+/*Funções de Data e Hora - Manipulam valores de datae hora.*/
+-- Exemplo 1: Extrair ano da data de publicação
+SELECT titulo, data_publicacao, YEAR(data_publicacao) AS ano_publicacao FROM livros;
+-- Exemplo 2: Extrair mês da data de publicação
+SELECT titulo, data_publicacao,MONTH(data_publicacao) AS mes_publicacao FROM livros;
+-- Exemplo 3: Calcular idade dos autores
+SELECT nome, data_nascimento, TIMESTAMPDIFF(YEAR,data_nascimento, CURDATE()) AS idade FROM autores;
+-- Exemplo 4: Formatar data
+SELECT titulo, data_publicacao, DATE_FORMAT(data_publicacao,'%d/%m/%Y') AS data_formatada FROM livros;
+-- Exemplo 5: Vendas dos últimos 30 dias
+SELECT * FROM vendas WHERE data_venda >= DATE_SUB(CURDATE(), INTERVAL 30 DAY);
+-- Exemplo 6: Data atual e hora atual
+SELECT CURDATE() AS data_atual, NOW() AS data_hora_atual;
+
+/*Funções Matemáticas - Realizam cálculos matemáticos.*/
+-- Exemplo 1: Arredondar preços para cima
+SELECT titulo, preco, CEILING(preco) AS preco_arredondado FROM livros;
+-- Exemplo 2: Arredondar preços para baixo
+SELECT titulo, preco, FLOOR(preco) AS preco_arredondado FROM livros;
+-- Exemplo 3: Arredondar com precisão específica
+SELECT titulo, preco, ROUND(preco, 1) AS preco_arredondado FROM livros;
+-- Exemplo 4: Valor absoluto
+SELECT -10, ABS(-10) AS valor_absoluto;
+-- Exemplo 5: Potenciação
+SELECT 2, POWER(2, 3) AS dois_ao_cubo;
+-- Exemplo 6: Raiz quadrada
+SELECT 16, SQRT(16) AS raiz_quadrada;
+
+
+/*Funções de Controle de Fluxo - Permitem lógica condicional em suas consultas.*/
+-- Exemplo 1: Classificar livros por faixa de preço
+SELECT titulo, preco,
+CASE
+WHEN preco < 40 THEN 'Barato' 
+WHEN preco BETWEEN 40 AND 60 THEN 'Médio'
+ELSE 'Caro' END AS categoria_preco FROM livros;
+-- Exemplo 2: IF para verificar disponibilidade
+SELECT titulo, estoque, IF(estoque > 0,'Disponível','Indisponível') AS status FROM livros;
+-- Exemplo 3: IFNULL para tratar valores nulos
+SELECT titulo, IFNULL(genero,'Sem gênero definido') AS genero FROM livros;
+
+
+/*Exercícios Práticos 2
+A- Liste os autores e seus livros,
+mostrando o título em
+maiúsculas
+
+B- Calcule a média de preço dos
+livros por nacionalidade do
+autor
+
+C- Encontre o livro mais vendido
+(maior quantidade total)
+
+D- Liste os livros publicados há
+mais de 50 anos
+
+E- Calcule o valor total de
+vendas por mês*/
+
+-- A Liste os autores e seus livros, mostrando o título em maiúsculas
+DELIMITER //
+CREATE FUNCTION GetTitulosCaps(
+DELIMITER ;
+-- B Calcule a média de preço dos livros por nacionalidade do autor
+DELIMITER //
+CREATE FUNCTION GetMediaPreco(nac VARCHAR(100)) RETURNS DECIMAL(10,2) DETERMINISTIC BEGIN
+	DECLARE media DECIMAL(10,2);
+    SELECT ROUND(AVG(l.preco), 2) INTO media
+    FROM autores a 
+    JOIN livros l ON a.autor_id = l.autor_id
+    WHERE a.nacionalidade = nac;
+    RETURN media;
+END //
+DELIMITER ;
+
+SELECT DISTINCT a.nacionalidade, GetMediaPreco(a.nacionalidade) AS preco_medio
+FROM autores a;
+
+
+-- C- Encontre o livro mais vendido (maior quantidade total) Liste os livros publicados há mais de 50 anos
+DELIMITER //
+CREATE FUNCTION GetLivroMaisVendido() RETURNS VARCHAR(255)
+DETERMINISTIC
+BEGIN
+	DECLARE titulo_mais_vendido VARCHAR(255);
+    
+    SELECT l.titulo INTO titulo_mais_vendido FROM livros l
+    JOIN vendas v ON l.livro_id = v.livro_id
+    GROUP BY l.livro_id, l.titulo
+    ORDER BY SUM(v.quantidade) DESC
+    LIMIT 1;
+    
+    RETURN titulo_mais_vendido;
+END//
+
+DELIMITER ;
+
+-- D- Liste os livros publicados há mais de 50 anos
+DELIMITER //
+CREATE FUNCTION GetLivrosPublicadosAntigos(VARCHAR(255), DATETIME '%d/%m/%Y')
+DETERMINISTIC
+BEGIN
+	
+DELIMITER ;
