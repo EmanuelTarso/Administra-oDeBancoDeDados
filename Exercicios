@@ -155,6 +155,11 @@ vendas por mês*/
 
 -- A Liste os autores e seus livros, mostrando o título em maiúsculas
 DELIMITER //
+CREATE FUNCTION ListarTituloMaiusculo(l.titulo, a.nome) VARCHAR(255)
+DETERMINISTIC
+BEGIN
+	
+DELIMITER ;
 CREATE FUNCTION GetTitulosCaps(
 DELIMITER ;
 -- B Calcule a média de preço dos livros por nacionalidade do autor
@@ -193,8 +198,37 @@ DELIMITER ;
 
 -- D- Liste os livros publicados há mais de 50 anos
 DELIMITER //
-CREATE FUNCTION GetLivrosPublicadosAntigos(VARCHAR(255), DATETIME '%d/%m/%Y')
+
+CREATE FUNCTION CalcularAnosPublicacao(id_livro INT) RETURNS INT
 DETERMINISTIC
 BEGIN
-	
+	DECLARE anos INT DEFAULT 0;
+    
+    SELECT TIMESTAMPDIFF(YEAR, data_publicacao, CURDATE())
+    INTO anos FROM livros
+    WHERE livro_id = id_livro;
+    
+    RETURN anos ;
+END //
 DELIMITER ;
+	
+SELECT CalcularAnosPublicacao(1);
+
+SELECT titulo, data_publicacao, CalcularAnosPublicacao(livro_id) AS anos
+FROM livros WHERE CalcularAnosPublicacao(livro_id) > 50 ORDER BY anos DESC;
+
+-- E Calcule o valor total de vendas por mês
+DELIMITER //
+CREATE FUNCTION CalcularVendasPorMes(ano INT, mes INT) RETURNS DECIMAL (10,2) 
+DETERMINISTIC
+BEGIN
+	DECLARE total_vendas DECIMAL(10,2) DEFAULT 0;
+    SELECT COALESCE(SUM(v.quantidade * l.preco), 0)
+    INTO total_vendas FROM vendas v JOIN livros l ON v.livro_id = l.livro_id
+    WHERE YEAR(v.data_venda) = ano AND MONTH(data_venda) = mes;
+    RETURN total_vendas;
+END//
+
+DELIMITER ;
+
+SELECT CalcularVendasPorMes(2023, 3);
