@@ -1,0 +1,148 @@
+CREATE DATABASE ExerciciosAula;
+
+-- ------------------------------------------------- TEORICAS ---------------------------------------------
+
+-- 1
+
+-- RESPOSTA:
+
+-- 2
+
+-- RESPOSTA:
+
+-- 3
+
+-- RESPOSTA:
+
+-- 4
+
+-- RESPOSTA:
+ 
+-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// --
+/*
+EXERCÍCIOS PRÁTICOS
+5. Desenvolva uma SP que:
+• Receba quatro números decimais como parâmetros
+• Calcule a média aritmética
+• Retorne o resultado
+• Armazene os dados em uma tabela com: ID (PK), números, resultado, data/hora e usuário
+
+
+6. Crie uma SP para um sistema hospitalar que:
+• Conte o total de pacientes cadastrados
+• Conte o total de médicos cadastrados
+• Exiba ambos os resultados
+• Crie as tabelas necessárias com 5 registros cada
+
+
+7. Resolva o problema da Maria: Maria precisa de fita para embrulhar presentes. Cada presente
+precisa de 60cm de fita. A loja vende fita por R$ 5,50 o metro. Crie uma SP que calcule quanto
+Maria gastará para embrulhar 8 presentes.
+
+
+8. Desenvolva uma SP que:
+• Receba um número como parâmetro
+• Calcule seu cubo (número³)
+• Some o resultado com a raiz quadrada de 144
+• Calcule e retorne a raiz quadrada na própria SP
+
+
+9. Sistema de impostos automotivos: Crie uma SP que calcule o preço final de veículos no Brasil e
+Chile:
+País Custo Fábrica Impostos Distribuição Margem Concessionária
+Brasil R$ 15.000 45% R$ 3.200 4%
+Chile R$ 12.500 18% R$ 1.800 2.5% 
+
+10. Sistema de lanchonete:
+• Crie tabela Cardapio com os itens abaixo
+• Crie tabela Pedidos
+• Desenvolva SP para registrar consumo por cliente
+Cardápio:
+• Hambúrguer: R$ 8,50
+• Pizza Individual: R$ 12,00
+• Batata Frita: R$ 6,00
+• Refrigerante: R$ 4,50
+• Sorvete: R$ 5,00
+
+
+11. Sistema de livraria: Crie uma SP que:
+• Crie tabelas LIVROS e EDITORAS
+• Insira 8 livros e 4 editoras
+• Calcule: total de livros, total de editoras, estoque total, valor total do estoque
+• Exiba relatório completo
+Estruturas:
+• LIVROS: ID, TITULO, AUTOR, ESTOQUE, PRECOCUSTO, PRECOVENDA
+• EDITORAS: ID, NOME, CNPJ, TELEFONE, CIDADE 
+
+12. Sistema de vendas:
+• Crie tabela VENDAS com ID auto-incremento
+• Desenvolva SP que receba: código produto, quantidade, valor unitário
+• Calcule automaticamente o valor total
+• Insira na tabela com data atual
+
+
+13. Crie uma SP que adicione a coluna "desconto" (DECIMAL) na tabela VENDAS.
+
+
+14. Desenvolva uma SP que atualize o campo desconto, recebendo ID da venda e percentual de
+desconto como parâmetros.
+
+
+15. Crie uma SP que gere outra SP chamada "spbackupvendas" com comando PRINT de
+confirmação.
+
+
+16. Desenvolva uma SP chamada "sprelatoriotempo" que:
+• Aguarde 15 segundos (WAITFOR)
+• Exiba data/hora inicial e final
+• Calcule o tempo decorrido 
+*/
+
+-- ---------------------------------------------- PRATICAS ---------------------------------------------------------
+-- 5
+CREATE TABLE Exercicio5 (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ numeros1 FLOAT,	
+ numeros2 FLOAT,	
+ numeros3 FLOAT,	
+ numeros4 FLOAT,	
+ resultado DECIMAL (10,2),
+ data_hota DATE,
+ usuario VARCHAR (100)
+);
+
+DELIMITER //
+CREATE PROCEDURE calcularMedia(IN num1 FLOAT, IN num2 FLOAT, IN num3 FLOAT, IN num4 FLOAT, dataRealizada DATE, usuarioAtual VARCHAR(100))
+BEGIN
+	INSERT INTO exercicio5 (numeros1, numeros2, numeros3, numeros4, resultado, data_hora, usuario)
+    VALUES (num1, num2, num3, num4, (num1 + num2 + num3 + num4) / 4, dataRealizada, usuarioAtual);
+END //
+DELIMITER ;
+
+CALL calcularMedia(5,5,5,5,curdate(),'Emanuel');
+
+-- 6
+CREATE TABLE Exercicio6 (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pacientes VARCHAR(100),
+    medicos VARCHAR(100)
+);
+INSERT INTO Exercicio6 (pacientes, medicos) VALUES 
+('João Silva', 'Dr. Marcos Oliveira'),
+('Maria Souza', 'Dra. Ana Paula'),
+('Carlos Mendes', 'Dr. Ricardo Lima'),
+('Fernanda Costa', 'Dra. Beatriz Ramos'),
+('Lucas Pereira', 'Dr. Henrique Alves');
+
+DELIMITER //
+CREATE PROCEDURE contaHospital()
+BEGIN
+	SELECT COUNT(pacientes) AS total_pacientes, COUNT(medicos) AS total_medicos FROM Exercicio6;
+END //
+
+DELIMITER ;
+
+CALL contaHospital();
+
+
+-- 7
