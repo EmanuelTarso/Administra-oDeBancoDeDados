@@ -123,6 +123,39 @@ CALL ListarTreinosPorInstrutor(1);
 DELIMITER // 
 CREATE PROCEDURE AtualizarCondicaoEquipamento(IN idEquipamento INT, IN novaCondicao VARCHAR(50))
 BEGIN
-	
+	UPDATE equipamentos SET condicao = novaCondicao
+    WHERE id = idEquipamento;
 END //
 DELIMITER ;
+
+CALL AtualizarCondicaoEquipamento(1, 'Usado')
+
+
+-- 4 Crie uma procedure chamada AgendarAula que recebe idInstrutor (INT),
+-- nomeAula (VARCHAR), dataAula (DATE) e capacidadeAula (INT). Ela deve inserir uma nova aula na tabela aulas.
+
+DELIMITER // 
+CREATE PROCEDURE AgendarAula(IN idInstrutor INT, IN nomeAula VARCHAR(50), dataAula DATE, capacidadeAula INT)
+BEGIN
+	INSERT INTO aulas(instrutor_id, nome_aula, data_aula, capacidade)
+    VALUES (idInstrutor, nomeAula, dataAula, capacidadeAula);
+END //
+DELIMITER ;
+
+CALL AgendarAula(1, 'Aula Musculação iniciante', CURDATE(), 10)
+
+
+-- 5 Crie uma procedure chamada RemoverTreino que recebe idTreino (INT) e deleta o treino correspondente da tabela treinos.
+-- Adicione uma verificação simples para garantir que o ID exista (usando IF EXISTS, por exemplo).
+
+DELIMITER // 
+CREATE PROCEDURE RemoverTreino(IN idTreino INT)
+BEGIN
+	IF EXISTS (SELECT 1 FROM treinos WHERE id = idTreino) THEN
+        DELETE FROM treinos
+        WHERE id = idTreino;
+    END IF;
+END //
+DELIMITER ;
+
+CALL RemoverTreino(5)
