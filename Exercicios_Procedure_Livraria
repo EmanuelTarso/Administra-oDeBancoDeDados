@@ -1,0 +1,116 @@
+CREATE DATABASE livraria_paginas_sonhos;
+USE livraria_paginas_sonhos;
+-- Tabela de clientes 
+CREATE TABLE clientes ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+nome VARCHAR(100) NOT NULL, 
+email VARCHAR(100) UNIQUE,
+telefone VARCHAR(20), 
+cpf VARCHAR(14) UNIQUE, 
+data_cadastro DATE, 
+total_gasto DECIMAL(10,2) DEFAULT 0, 
+pontos_fidelidade INT DEFAULT 0 );
+-- Tabela de livros 
+CREATE TABLE livros ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+titulo VARCHAR(200) NOT NULL, 
+autor VARCHAR(100), isbn
+VARCHAR(20) UNIQUE, 
+preco DECIMAL(10,2) NOT NULL, 
+estoque INT DEFAULT 0, 
+categoria VARCHAR(50), 
+editora VARCHAR(100), 
+ano_publicacao INT );
+-- Tabela de vendas 
+CREATE TABLE vendas ( 
+id INT AUTO_INCREMENT PRIMARY KEY, 
+cliente_id INT, 
+data_venda DATETIME DEFAULT
+CURRENT_TIMESTAMP, 
+valor_total DECIMAL(10,2), 
+desconto_aplicado DECIMAL(10,2) DEFAULT 0, 
+forma_pagamento VARCHAR(30), 
+status VARCHAR(20) DEFAULT 'finalizada', 
+FOREIGN KEY (cliente_id) REFERENCES clientes(id) 
+);
+-- Tabela de itens da venda 
+CREATE TABLE itens_venda ( id INT AUTO_INCREMENT PRIMARY KEY, venda_id INT, livro_id INT, quantidade INT,
+preco_unitario DECIMAL(10,2), subtotal DECIMAL(10,2), FOREIGN KEY (venda_id) REFERENCES vendas(id), FOREIGN KEY (livro_id) REFERENCES
+livros(id) );
+-- Inserir dados iniciais 
+INSERT INTO clientes (nome, email, telefone, cpf, data_cadastro) VALUES ('Carlos Mendes', 'carlos@email.com',
+'11987654321','123.456.789-00', '2024-01-10'), 
+('Ana Paula', 'ana@email.com', '11976543210', '987.654.321-00', '2024-02-15'), 
+('Roberto Silva','roberto@email.com', '11965432109', '456.789.123-00', '2024-03-20'), 
+('Juliana Costa', 'juliana@email.com', '11954321098', '789.123.456-00', '2023-06-15');
+
+INSERT INTO livros (titulo, autor, isbn, preco, estoque, categoria, editora, ano_publicacao) VALUES 
+('1984', 'George Orwell', '978-0451524935',45.90, 15, 'Ficção', 'Companhia das Letras', 1949), 
+('O Senhor dos Anéis', 'J.R.R. Tolkien', '978-0544003415', 89.90, 8, 'Fantasia', 'HarperCollins', 1954),
+('Dom Casmurro', 'Machado de Assis', '978-8535911664', 35.50, 20, 'Literatura Brasileira', 'Penguin', 1899), 
+('Sapiens', 'Yuval Noah Harari', '978-0062316097', 54.90, 12, 'História', 'L&PM', 2011), 
+('O Pequeno Príncipe', 'Antoine de Saint-Exupéry', '978-0156012195', 29.90, 25, 'Infantil', 'Agir', 1943),
+('Clean Code', 'Robert Martin', '978-0132350884', 98.00, 5, 'Tecnologia', 'Alta Books', 2008);
+
+
+-- Resolução de problemas
+
+DELIMITER //
+CREATE PROCEDURE spRealizarVenda(
+IN id_cliente INT, IN id_livro INT,
+IN quantidade INT,
+IN formaPagamento VARCHAR(30),
+OUT mensagem VARCHAR(100),
+OUT id_venda INT
+)
+BEGIN
+DECLARE	v_estoque_atual INT;
+DECLARE v_preco DECIMAL (10,2);
+DECLARE v_subTotal DECIMAL (10,2);
+DECLARE v_desconto DECIMAL (10,2) DEFAULT 0;
+DECLARE v_titulo VARCHAR (100);
+
+-- Verifica estoque
+SELECT estoque, preco, titulo INTO v_estoque_atual,v_preco, v_titulo FROM livros WHERE id = id_livro;
+
+-- VALIDAÇÃO CRITICA!!!!
+IF v_estoque_atual < quantidade THEN
+	SET mensagem = CONCAT('ERRO: Estoque insuficiente', v_estoque_atual,'unidade(s) disponiveis de"',v_titulo,'"');
+	SET id_venda = 0; 
+ELSE
+-- Calcular Venda
+	SET v_subtotal = v_preco * quantidade;
+-- Realizar Venda
+	INSERT INTO vendas (
+    cliente_id, data_venda, valor_total, desconto_aplicado, forma_pagamento)
+    VALUES (
+    id_cliente, CURDATE(), v_subtotal, v_desconto, formaPagamento);
+    SET id_venda = LAST_INSERT_ID();
+-- Inserir ItensVenda
+	INSERT INTO itens_venda(venda_id, livro_id, quantidade, preco_unitario, subtotal) VALUES (id_venda, id_livro, quantidade, v_preco, v_subtotal);
+    
+-- Atualizar Estoque
+	UPDATE livros SET estoque = estoque - quantidade WHERE id = id_livro;
+    SET mensagem = CONCAT('Venda Realizada! Venda #', id_venda, '- ', v_titulo);
+END IF;
+END //
+DELIMITER 
+
+CALL spRealizarVenda(1,1,1,'PIX',@mensagem, @id_venda);
+SELECT @mensagem AS Mensagem , @id_venda AS idVenda;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
